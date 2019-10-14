@@ -9,10 +9,9 @@ import api from "Api";
 //=========================
 const getAllEventsRequestWithFilter = async (start, end, id) => {
   try {
-    const result = await api.get("/events");
-    // const result = await api.get(
-    //   `/events?filter[where][userId]=${id}&filter[where][end][gt]=${start}&filter[where][end][lt]=${end}&filter[order]=start ASC&`
-    // );
+    const result = await api.get(
+      `/events?filter[where][userId]=${id}&filter[where][end][gt]=${start}&filter[where][end][lt]=${end}&filter[order]=start ASC&`
+    );
 
     return result.data;
   } catch (err) {
@@ -23,6 +22,7 @@ const getAllEventsRequest = async () => {
   try {
     const result = await api.get("/events");
     return result.data;
+    // console.log("++++++++++",result);
   } catch (err) {
     return err;
   }
@@ -30,6 +30,7 @@ const getAllEventsRequest = async () => {
 const addEventRequest = async newEvent => {
   try {
     const result = await api.post("/events", newEvent);
+    console.log("POST--------", newEvent);
     // const result = newEvent;
     return result.data;
   } catch (err) {
@@ -40,6 +41,7 @@ const deleteEventRequest = async id => {
   try {
     const result = await api.delete(`/events/${id}`);
     // const result = newEvent;
+    // console.log(id);
     return result.data;
   } catch (err) {
     return err;
@@ -47,7 +49,10 @@ const deleteEventRequest = async id => {
 };
 const updateEventRequest = async id => {
   try {
-    const result = await api.patch(`/events/?id=${id.id}`, id);
+    // console.log("Update event is-----------");
+    // console.log(id);
+    const result = await api.patch(`/events/${id.id}`, id);
+    // const result = await api.patch(`/events/?id=${id.id}`, id);
     // const result = newEvent;
     return result.data;
   } catch (err) {
@@ -59,6 +64,7 @@ const updateEventRequest = async id => {
 // CALL(GENERATOR) ACTIONS
 //=========================
 function* getAllEventsFromDB(item) {
+  
   const { payload } = item;
 
   if (payload.filter) {
@@ -80,10 +86,13 @@ function* getAllEventsFromDB(item) {
     }
   } else {
     try {
+      // console.log("++++++++++",item);
       let myEvents = yield call(getAllEventsRequest);
+      console.log("++++++++++",myEvents)
       myEvents.map(item => {
         item.start = new Date(item.start);
         item.end = new Date(item.end);
+        // console.log(item.start,"=====",item.end)
         return;
       });
       yield put(Actions.getAllEventsSuccess(myEvents, myEvents));
@@ -127,6 +136,7 @@ function* deleteEventFromDB(item) {
 function* updateEventFromDB(item) {
   try {
     const data = yield call(updateEventRequest, item.payload);
+    // console.log("DDDDDDDDDTTTTTTTTTTT",data);
     yield put(Actions.updateEventSuccess(data));
   } catch (err) {
     yield put(Actions.updateEventFailure(err));
